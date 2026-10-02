@@ -1,16 +1,20 @@
 ---
-name: drop-mr-and-jira
-description: Opens a merge request, comments MR: <url> on the Jira ticket, and moves it to QA Pending. User-invoked via /drop-mr-and-jira.
+name: drop-pr-and-jira
+description: Opens a merge request (or reuses the existing one), comments MR: <url> on the Jira ticket, and moves it to QA Pending. User-invoked via /drop-pr-and-jira.
 disable-model-invocation: true
 ---
 
-# drop-mr-and-jira
+# drop-pr-and-jira
 
-Drop the MR, then attach it to Jira and park the ticket in QA.
+Attach the branch MR/PR to Jira and park the ticket in QA.
 
-## 1. MR
+## 1. MR/PR
 
-Read and execute [../drop-mr/SKILL.md](../drop-mr/SKILL.md) (including `mr-body.md`). Do not continue until you have an MR URL.
+Read and execute [../drop-pr/SKILL.md](../drop-pr/SKILL.md) (including `pr-body.md`).
+
+If an open MR/PR already exists: **keep it.** Use that URL. Do not create another.
+
+Do not continue until you have an MR/PR URL.
 
 ## 2. Ticket
 
@@ -27,7 +31,7 @@ Discover tools first (`GetDynamicTools` on the Atlassian namespace), then:
 
 1. `getAccessibleAtlassianResources` → `cloudId` (ask if more than one site fits)
 2. `getJiraIssue` — confirm it is the right ticket
-3. `addOrEditJiraIssueComment` — comment body **exactly** `MR: <url>` (the live MR URL, nothing else)
+3. `addOrEditJiraIssueComment` — comment body **exactly** `MR: <url>` using the **existing** MR/PR URL (nothing else). If that comment is already on the ticket, leave it.
 4. `transitionJiraIssue` — `transitionName` **QA Pending**, or the closest real transition (`Ready for QA`, `Pendente QA`, `In QA`, `QA`). If none exist, say so and leave status unchanged.
 
 If the MCP is missing or `needsAuth`, stop and tell the user to run `agent mcp login atlassian`. Do not invent a REST fallback unless they ask.
@@ -36,7 +40,7 @@ If the MCP is missing or `needsAuth`, stop and tell the user to run `agent mcp l
 
 Reply with:
 
-- MR URL
+- MR/PR URL (and that it already existed, if so)
 - ticket key
 - new status (or that no QA-like transition existed)
 

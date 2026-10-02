@@ -1,19 +1,27 @@
 ---
-name: drop-mr
-description: Opens a GitLab/GitHub merge request from the current branch with a brief e2e body. User-invoked via /drop-mr. Does not touch Jira.
+name: drop-pr
+description: Opens a GitLab/GitHub merge request from the current branch with a brief e2e body. User-invoked via /drop-pr. Does not touch Jira.
 disable-model-invocation: true
 ---
 
-# drop-mr
+# drop-pr
 
-Open one MR for the current branch. Stop after the MR URL is posted. Do not touch Jira (that is `/drop-mr-and-jira`).
+Open one MR/PR for the current branch. Stop after the URL is posted. Do not touch Jira (that is `/drop-pr-and-jira`).
 
-Read [mr-body.md](mr-body.md) before writing title or body.
+Read [pr-body.md](pr-body.md) before writing title or body.
+
+## Existing MR/PR
+
+If an open MR/PR already exists for this branch: **state the URL, keep it, stop.** Do not open a second. Do not edit title or body.
+
+## Authorship
+
+Author and committer must be **Uanela \<uanelaluiswayne@gmail.com\>**. Never add `Co-authored-by` for `uanela_technoplus` (or any TechnoPlus work account). Set `GIT_AUTHOR_*` and `GIT_COMMITTER_*` for that identity. Do not change git config.
 
 ## Preconditions
 
 - Dirty tree (uncommitted work): stop and say so. Do not commit unless the user asked.
-- No commits ahead of the target: stop. There is nothing to drop.
+- No commits ahead of the target **and** no existing MR/PR: stop. There is nothing to drop.
 - Never update git config, never `--force` push, never skip hooks.
 
 ## Inspect (parallel)
@@ -33,15 +41,17 @@ Also `git log <target>..HEAD` and `git diff <target>...HEAD` once the target is 
 
 **Host:** GitLab if origin host is not github.com; GitHub if it is.
 
+Look up an existing open MR/PR for this source branch **before** creating one (GitHub: `gh pr view`; GitLab: list MRs filtered by `source_branch`).
+
 ## Push
 
 ```bash
 git push -u origin HEAD
 ```
 
-## Create
+## Create (only if none exists)
 
-Title + body from [mr-body.md](mr-body.md). Pass the body via HEREDOC.
+Title + body from [pr-body.md](pr-body.md). Pass the body via HEREDOC.
 
 **GitHub** (`gh`):
 
@@ -63,8 +73,6 @@ EOF
 
 **GitLab without `glab`:** `POST /api/v4/projects/:id/merge_requests` with a token from `git credential fill` for that host (`source_branch`, `target_branch`, `title`, `description`). Do not print the token.
 
-If an open MR already exists for this branch: reuse it (update title/body only if they are wrong). Do not open a second.
-
 ## Done
 
-Reply with the MR URL only plus one line if something was off (retargeted, reused existing). No recap of the diff.
+Reply with the MR/PR URL. If it already existed, say that in one line. No recap of the diff.
